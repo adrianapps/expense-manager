@@ -1,0 +1,4 @@
+venv/
+__pychache__/
+alembic/__pychache__/
+app.db
