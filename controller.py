@@ -1,3 +1,4 @@
+from datetime import datetime
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -20,6 +21,10 @@ class ExpenseController:
 
     def add_expense(self, title, price, date=None):
         with self.get_session() as session:
+            if date == "":
+                date = datetime.now().date()
+            if isinstance(date, str):
+                date = datetime.strptime(date, "%Y-%m-%d").date()
             new_expense = Expense(title=title, price=price, date=date)
             session.add(new_expense)
             session.commit()
@@ -36,3 +41,20 @@ class ExpenseController:
             expense = session.query(Expense).filter(Expense.id == expense_id).first()
             for field, value in props.items():
                 setattr(expense, field, value)
+
+    def filter_expense(self, title=None, min_price=None, max_price=None, min_date=None, max_date=None):
+        with self.get_session() as session:
+            query = session.query(Expense)
+
+            if title:
+                query = query.filter(Expense.title.like(f"%{title}%"))
+            if min_price is not None:
+                query = query.filter(Expense.price >= min_price)
+            if max_price is not None:
+                query = query.filter(Expense.price <= max_price)
+            if min_date:
+                query = query.filter(Expense.date >= min_date)
+            if max_date:
+                query = query.filter(Expense.date <= max_date)
+
+            return query.all()
