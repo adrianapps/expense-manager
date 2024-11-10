@@ -1,5 +1,5 @@
-from view import ExpensesApp
-from controller import ExpenseController
+from src.view import ExpensesApp
+from src.controller import ExpenseController
 
 
 def main():

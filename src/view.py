@@ -7,7 +7,7 @@ from textual_plotext import PlotextPlot
 
 
 class ExpensesApp(App):
-    CSS_PATH = "styles.tcss"
+    CSS_PATH = "../styles.tcss"
 
     BINDINGS = [
         ("m", "toggle_dark", "Toggle dark mode"),
