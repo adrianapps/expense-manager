@@ -189,6 +189,7 @@ class DeleteConfirm(Screen):
         self.controller.delete_expense(expense_id=self.expense_id)
         self.app.pop_screen()
         self.app._load_expenses()
+        self.app._load_plot()
 
     @on(Button.Pressed, "#cancel")
     def cancel(self):
