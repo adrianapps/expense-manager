@@ -15,7 +15,12 @@ class ExpensesApp(App):
         ("f", "filter", "Filter"),
         ("d", "delete", "Delete"),
         ("q", "quit_app", "Quit"),
+        ("1", "sort_by_title", "Sort By Title"),
+        ("2", "sort_by_price", "Sort By Price"),
+        ("3", "sort_by_date", "Sort By Date"),
     ]
+
+    current_sorts = set()
 
     def __init__(self, controller):
         super().__init__()
@@ -26,9 +31,13 @@ class ExpensesApp(App):
 
     def compose(self):
         yield Header()
-        self.expenses_table = DataTable(id="expenses_table")
+        self.expenses_table = DataTable()
         self.expenses_table.focus()
-        self.expenses_table.add_columns("Title", "Price", "Date")
+
+        self.expenses_table.add_column("Title", key="title")
+        self.expenses_table.add_column("Price", key="price")
+        self.expenses_table.add_column("Date", key="date")
+
         self.expenses_table.zebra_stripes = True
         self.expenses_table.cursor_type = "row"
 
@@ -49,6 +58,30 @@ class ExpensesApp(App):
         self.sub_title = "Expense Manager Application built with Python"
         self._load_expenses()
         self._load_plot()
+
+    def sort_reverse(self, sort_type):
+        reverse = sort_type in self.current_sorts
+        if reverse:
+            self.current_sorts.remove(sort_type)
+        else:
+            self.current_sorts.add(sort_type)
+        return reverse
+
+    def action_sort_by_title(self):
+        table = self.query_one(DataTable)
+        table.sort(
+            "title",
+            key=lambda title: title.lower(),
+            reverse=self.sort_reverse("Title"),
+        )
+
+    def action_sort_by_price(self):
+        table = self.query_one(DataTable)
+        table.sort("price", reverse=self.sort_reverse("price"))
+
+    def action_sort_by_date(self):
+        table = self.query_one(DataTable)
+        table.sort("date", reverse=self.sort_reverse("date"))
 
     def _load_plot(self, expenses=None):
         if expenses is None:
