@@ -12,6 +12,7 @@ class ExpensesApp(App):
     BINDINGS = [
         ("m", "toggle_dark", "Toggle dark mode"),
         ("a", "add", "Add"),
+        ("u", "update", "Update"),
         ("f", "filter", "Filter"),
         ("d", "delete", "Delete"),
         ("q", "quit_app", "Quit"),
@@ -43,6 +44,7 @@ class ExpensesApp(App):
 
         buttons_panel = Vertical(
             Button("Add", variant="success", id="add"),
+            Button("Update", variant="default", id="update"),
             Button("Filter", variant="primary", id="filter"),
             Button("Delete", variant="error", id="delete"),
             Static(classes="separator"),
@@ -111,9 +113,6 @@ class ExpensesApp(App):
     def action_add(self):
         self.push_screen(InputDialog(self.controller))
 
-    def _add_expense(self, title, price, date):
-        self.controller.add_expense(title, price, date)
-
     @on(Button.Pressed, "#delete")
     def action_delete(self):
         expenses = self.query_one(DataTable)
@@ -126,6 +125,16 @@ class ExpensesApp(App):
     @on(Button.Pressed, "#filter")
     def action_filter(self):
         self.push_screen(Filter(self.controller))
+
+    @on(Button.Pressed, "#update")
+    def action_update(self):
+        expenses = self.query_one(DataTable)
+        cell_key = expenses.coordinate_to_cell_key(expenses.cursor_coordinate)
+        row_key = cell_key.row_key
+
+        if row_key:
+            self.push_screen(UpdateInput(self.controller, row_key.value))
+    
 
 
 class Filter(Screen):
@@ -266,6 +275,66 @@ class InputDialog(Screen):
         price = self.query_one("#input_price").value
         date = self.query_one("#input_date").value
         self.controller.add_expense(title, price, date)
+        self.app._load_expenses()
+        self.app._load_plot()
+        self.app.pop_screen()
+
+    @on(Button.Pressed, "#cancel")
+    def cancel(self):
+        self.app.pop_screen()
+
+
+class UpdateInput(Screen):
+    def __init__(self, controller, expense_id):
+        super().__init__()
+        self.controller = controller
+        self.expense_id = expense_id
+
+    def on_mount(self):
+        self.expense_data = self.controller.get_expense_detail(self.expense_id)
+        self.query_one("#input_title").value = self.expense_data.title
+        self.query_one("#input_price").value = str(self.expense_data.price)
+        self.query_one("#input_date").value = self.expense_data.date.strftime("%Y-%m-%d")
+
+    def compose(self):
+        today_date = datetime.now().strftime("%Y-%m-%d")
+
+        yield Grid(
+            Label("Add Expense", id="title"),
+            Label("Title:"),
+            Input(
+                placeholder="Expense Title",
+                id="input_title",
+            ),
+            Label("Price:"),
+            Input(
+                placeholder="Expense Price",
+                id="input_price",
+            ),
+            Label("Date: "),
+            Input(
+                placeholder=today_date,
+                id="input_date",
+            ),
+            Static(),
+            Button("Cancel", variant="error", id="cancel"),
+            Button("Ok", variant="success", id="ok"),
+            id="input-dialog",
+        )
+
+    @on(Button.Pressed, "#ok")
+    def submit(self):
+        title = self.query_one("#input_title").value
+        price = self.query_one("#input_price").value
+        date = self.query_one("#input_date").value
+
+        updated_data = {
+            "title": title,
+            "price": float(price),
+            "date": datetime.strptime(date, "%Y-%m-%d")
+        }
+
+        self.controller.update_expense(self.expense_id, updated_data)
         self.app._load_expenses()
         self.app._load_plot()
         self.app.pop_screen()

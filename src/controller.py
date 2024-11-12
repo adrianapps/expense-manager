@@ -18,6 +18,12 @@ class ExpenseController:
         with self.get_session() as session:
             expenses = session.query(Expense).all()
             return expenses
+    
+    def get_expense_detail(self, expense_id):
+        with self.get_session() as session:
+            expense = session.query(Expense).filter(Expense.id == expense_id).first()
+            if expense:
+                return expense
 
     def add_expense(self, title, price, date=None):
         with self.get_session() as session:
@@ -41,6 +47,7 @@ class ExpenseController:
             expense = session.query(Expense).filter(Expense.id == expense_id).first()
             for field, value in props.items():
                 setattr(expense, field, value)
+            session.commit()
 
     def filter_expense(self, title=None, min_price=None, max_price=None, min_date=None, max_date=None):
         with self.get_session() as session:
