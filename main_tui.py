@@ -1,4 +1,4 @@
-from src.view import ExpensesApp
+from src.view_tui import ExpensesApp
 from src.controller import ExpenseController
 
 
