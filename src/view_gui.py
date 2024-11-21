@@ -22,14 +22,8 @@ class App(customtkinter.CTk):
         )
         add_button.pack(pady=10)
 
-        # delete_button = customtkinter.CTkButton(sidebar_frame, text="Delete", command=self.delete_expense)
-        # delete_button.pack(pady=10)
-
-        # update_button = customtkinter.CTkButton(sidebar_frame, text="Update", command=self.update_expense)
-        # update_button.pack(pady=10)
-
-        # filter_button = customtkinter.CTkButton(sidebar_frame, text="Filter", command=self.filter_expense)
-        # filter_button.pack(pady=10)
+        filter_button = customtkinter.CTkButton(sidebar_frame, text="Filter", command=self.filter_expenses)
+        filter_button.pack(pady=10)
 
         self.table_frame = customtkinter.CTkFrame(self)
         self.table_frame.pack(expand=True, fill="both", padx=20, pady=10)
@@ -42,26 +36,22 @@ class App(customtkinter.CTk):
             [expense.id, expense.title, expense.price, expense.date] for expense in self.expenses
         ]
 
-        # Clear the current table rows before creating new ones
         for widget in self.table_frame.winfo_children():
             widget.destroy()
 
-        # Create a row for each expense in the list
         for index, expense_data in enumerate(self.expenses_list):
             row_frame = customtkinter.CTkFrame(self.table_frame)
             row_frame.pack(fill="x", pady=5)
 
-            # Add labels to display data in the row
-            label_title = customtkinter.CTkLabel(row_frame, text=expense_data[0])  # Id
+            label_title = customtkinter.CTkLabel(row_frame, text=expense_data[0])  # id
             label_title.pack(side="left", padx=10)
-            label_price = customtkinter.CTkLabel(row_frame, text=expense_data[1])  # Price
+            label_price = customtkinter.CTkLabel(row_frame, text=expense_data[1])  # title 
             label_price.pack(side="left", padx=10)
-            label_date = customtkinter.CTkLabel(row_frame, text=expense_data[2])  # Date
+            label_date = customtkinter.CTkLabel(row_frame, text=expense_data[2])  # price 
             label_date.pack(side="left", padx=10)
-            label_date = customtkinter.CTkLabel(row_frame, text=expense_data[3])  # Date
+            label_date = customtkinter.CTkLabel(row_frame, text=expense_data[3])  # date
             label_date.pack(side="left", padx=10)
 
-            # Add Update and Delete buttons
             update_button = customtkinter.CTkButton(row_frame, text="Update", command=lambda idx=expense_data[0]: self.update_expense(idx))
             update_button.pack(side="right", padx=5)
 
@@ -78,6 +68,9 @@ class App(customtkinter.CTk):
     def delete_expense(self, expense_id):
         self.controller.delete_expense(expense_id)
         self.create_table()
+    
+    def filter_expenses(self):
+        pass
 
 
 class AddExpense(customtkinter.CTkToplevel):
@@ -104,7 +97,6 @@ class AddExpense(customtkinter.CTkToplevel):
         self.date_entry = customtkinter.CTkEntry(self, placeholder_text=today_date)
         self.date_entry.pack(pady=5)
 
-        # Przycisk do zapisania wydatku
         self.save_button = customtkinter.CTkButton(
             self, text="Save", command=self.save_expense
         )
